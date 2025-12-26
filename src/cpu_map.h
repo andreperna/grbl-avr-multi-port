@@ -338,10 +338,10 @@
   // Define stepper driver enable/disable output pin.
   #define STEPPER_DISABLE_PORT_0 D
   #define STEPPER_DISABLE_PORT_1 D
-  #define STEPPER_DISABLE_PORT_2 D
+  #define STEPPER_DISABLE_PORT_2 A
   #define STEPPER_DISABLE_BIT_0 6 // X Enable - Pin D6
   #define STEPPER_DISABLE_BIT_1 6 // Y Enable - Pin D6
-  #define STEPPER_DISABLE_BIT_2 6 // Z Enable - Pin D6
+  #define STEPPER_DISABLE_BIT_2 5 // Z Enable - Pin A5
   #define STEPPER_DISABLE_BIT(i) STEPPER_DISABLE_BIT_##i
   #define STEPPER_DISABLE_DDR(i) _DDR(STEPPER_DISABLE_PORT_##i)
   #define STEPPER_DISABLE_PORT(i) _PORT(STEPPER_DISABLE_PORT_##i)
@@ -359,6 +359,7 @@
   #define MIN_LIMIT_DDR(i) _DDR(MIN_LIMIT_PORT_##i)
   #define MIN_LIMIT_PORT(i) _PORT(MIN_LIMIT_PORT_##i)
   #define MIN_LIMIT_PIN(i) _PIN(MIN_LIMIT_PORT_##i)
+  #define INVERT_MIN_LIMIT_PIN_MASK ((1<<X_AXIS) | (1<<Y_AXIS) | (1<<Z_AXIS))
 
   #define MAX_LIMIT_PORT_0 D
   #define MAX_LIMIT_PORT_1 D
