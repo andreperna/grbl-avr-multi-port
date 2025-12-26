@@ -45,6 +45,26 @@
 // #define DEFAULTS_RAMPS_BOARD
 // #define CPU_MAP_2560_RAMPS_BOARD
 
+
+// PERNA----------------------------------------------------------------------
+// GPIO architecture compatibility layer
+//
+// Historically, DEFAULTS_RAMPS_BOARD has been used not only to select motion
+// and kinematic defaults, but also to implicitly enable a multi-port GPIO
+// electrical model (STEP/DIR/ENABLE signals spread across different MCU ports).
+//
+// To decouple board defaults from GPIO architecture, DEFAULTS_RAMPS_BOARD
+// implies GPIO_MODEL_MULTI_PORT here. New boards should explicitly define
+// GPIO_MODEL_MULTI_PORT instead of relying on DEFAULTS_RAMPS_BOARD.
+//
+// This preserves backward compatibility while clarifying the intended
+// architectural model.
+// PERNA----------------------------------------------------------------------
+// #if defined(DEFAULTS_RAMPS_BOARD) //PERNA
+  // #define GPIO_MODEL_MULTI_PORT //PERNA
+// #endif //PERNA
+
+
 // Serial baud rate
 // #define BAUD_RATE 230400
 #define BAUD_RATE 115200
@@ -110,7 +130,7 @@
 // on separate pin, but homed in one cycle. Also, it should be noted that the function of hard limits
 // will not be affected by pin sharing.
 // NOTE: Defaults are set for a traditional 3-axis CNC machine. Z-axis first to clear, followed by X & Y.
-#ifdef DEFAULTS_RAMPS_BOARD
+#ifdef GPIO_MODEL_MULTI_PORT
   #define HOMING_CYCLE_0 (1<<X_AXIS)   // Home X axis
   #define HOMING_CYCLE_1 (1<<Y_AXIS)   // Home Y axis
   #define HOMING_CYCLE_2 (1<<Z_AXIS)   // OPTIONAL: Home Z axis 
@@ -118,7 +138,7 @@
   #define HOMING_CYCLE_0 (1<<Z_AXIS)                // REQUIRED: First move Z to clear workspace.
   #define HOMING_CYCLE_1 ((1<<X_AXIS)|(1<<Y_AXIS))  // OPTIONAL: Then move X,Y at the same time.
   // #define HOMING_CYCLE_2                         // OPTIONAL: Uncomment and add axes mask to enable
-#endif // DEFAULTS_RAMPS_BOARD
+#endif // GPIO_MODEL_MULTI_PORT
 
 // NOTE: The following are two examples to setup homing for 2-axis machines.
 // #define HOMING_CYCLE_0 ((1<<X_AXIS)|(1<<Y_AXIS))  // NOT COMPATIBLE WITH COREXY: Homes both X-Y in one cycle. 
@@ -207,7 +227,7 @@
 // normally-open(NO) and normally-closed(NC) switches installed on their machine.
 // NOTE: PLEASE DO NOT USE THIS, unless you have a situation that needs it.
 // #define INVERT_LIMIT_PIN_MASK ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)) // Default disabled. Uncomment to enable.
-#ifdef DEFAULTS_RAMPS_BOARD
+#ifdef GPIO_MODEL_MULTI_PORT
   // Only enable the following line if you have - (min) limit switches attached
   //#define INVERT_MIN_LIMIT_PIN_MASK ((1<<X_AXIS) | (1<<Y_AXIS) | (1<<Z_AXIS))
   // Only enable the following line if you have + (max) limit switches attached
