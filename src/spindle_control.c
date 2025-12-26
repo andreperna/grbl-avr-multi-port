@@ -27,13 +27,15 @@ static float pwm_gradient; // Precalulated value to speed up rpm to PWM conversi
 
 void spindle_init()
 {    
-  // Configure variable spindle PWM and enable pin, if required.
-  SPINDLE_PWM_DDR |= (1<<SPINDLE_PWM_BIT); // Configure as PWM output pin.
-  SPINDLE_TCCRA_REGISTER = SPINDLE_TCCRA_INIT_MASK; // Configure PWM output compare timer
-  SPINDLE_TCCRB_REGISTER = SPINDLE_TCCRB_INIT_MASK;
-  SPINDLE_OCRA_REGISTER = SPINDLE_OCRA_TOP_VALUE; // Set the top value for 16-bit fast PWM mode
-  SPINDLE_ENABLE_DDR |= (1<<SPINDLE_ENABLE_BIT); // Configure as output pin.
-  SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
+  #ifdef SPINDLE_ENABLE_DDR //PERNA
+    // Configure variable spindle PWM and enable pin, if required.
+    SPINDLE_PWM_DDR |= (1<<SPINDLE_PWM_BIT); // Configure as PWM output pin.
+    SPINDLE_TCCRA_REGISTER = SPINDLE_TCCRA_INIT_MASK; // Configure PWM output compare timer
+    SPINDLE_TCCRB_REGISTER = SPINDLE_TCCRB_INIT_MASK;
+    SPINDLE_OCRA_REGISTER = SPINDLE_OCRA_TOP_VALUE; // Set the top value for 16-bit fast PWM mode
+    SPINDLE_ENABLE_DDR |= (1<<SPINDLE_ENABLE_BIT); // Configure as output pin.
+    SPINDLE_DIRECTION_DDR |= (1<<SPINDLE_DIRECTION_BIT); // Configure as output pin.
+  #endif //PERNA
 
   pwm_gradient = SPINDLE_PWM_RANGE/(settings.rpm_max-settings.rpm_min);
   spindle_stop();
@@ -42,14 +44,16 @@ void spindle_init()
 
 uint8_t spindle_get_state()
 {
-  #ifdef INVERT_SPINDLE_ENABLE_PIN
-    if (bit_isfalse(SPINDLE_ENABLE_PORT,(1<<SPINDLE_ENABLE_BIT)) && (SPINDLE_TCCRA_REGISTER & (1<<SPINDLE_COMB_BIT))) {
-  #else
-    if (bit_istrue(SPINDLE_ENABLE_PORT,(1<<SPINDLE_ENABLE_BIT)) && (SPINDLE_TCCRA_REGISTER & (1<<SPINDLE_COMB_BIT))) {
-  #endif
-    if (SPINDLE_DIRECTION_PORT & (1<<SPINDLE_DIRECTION_BIT)) { return(SPINDLE_STATE_CCW); }
-    else { return(SPINDLE_STATE_CW); }
-  }
+  #ifdef SPINDLE_ENABLE_DDR //PERNA
+    #ifdef INVERT_SPINDLE_ENABLE_PIN
+      if (bit_isfalse(SPINDLE_ENABLE_PORT,(1<<SPINDLE_ENABLE_BIT)) && (SPINDLE_TCCRA_REGISTER & (1<<SPINDLE_COMB_BIT))) {
+    #else
+      if (bit_istrue(SPINDLE_ENABLE_PORT,(1<<SPINDLE_ENABLE_BIT)) && (SPINDLE_TCCRA_REGISTER & (1<<SPINDLE_COMB_BIT))) {
+    #endif
+      if (SPINDLE_DIRECTION_PORT & (1<<SPINDLE_DIRECTION_BIT)) { return(SPINDLE_STATE_CCW); }
+      else { return(SPINDLE_STATE_CW); }
+    }
+  #endif //PERNA
 	return(SPINDLE_STATE_DISABLE);
 }
 
@@ -59,12 +63,14 @@ uint8_t spindle_get_state()
 // Called by spindle_init(), spindle_set_speed(), spindle_set_state(), and mc_reset().
 void spindle_stop()
 {
-  SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
-  #ifdef INVERT_SPINDLE_ENABLE_PIN
-    SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
-  #else
-    SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT); // Set pin to low
-  #endif
+  #ifdef SPINDLE_ENABLE_DDR //PERNA
+    SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
+    #ifdef INVERT_SPINDLE_ENABLE_PIN
+      SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);  // Set pin to high
+    #else
+      SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT); // Set pin to low
+    #endif
+  #endif //PERNA
 }
 
 
@@ -72,25 +78,27 @@ void spindle_stop()
 // and stepper ISR. Keep routine small and efficient.
 void spindle_set_speed(uint16_t pwm_value)
 {
-  SPINDLE_OCR_REGISTER = pwm_value; // Set PWM output level.
-  #ifdef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
-    if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
-      spindle_stop();
-    } else {
-      SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
-      #ifdef INVERT_SPINDLE_ENABLE_PIN
-        SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT);
-      #else
-        SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
-      #endif
-    }
-  #else
-    if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
-      SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
-    } else {
-      SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
-    }
-  #endif
+  #ifdef SPINDLE_ENABLE_DDR //PERNA
+    SPINDLE_OCR_REGISTER = pwm_value; // Set PWM output level.
+    #ifdef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
+      if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
+        spindle_stop();
+      } else {
+        SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
+        #ifdef INVERT_SPINDLE_ENABLE_PIN
+          SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT);
+        #else
+          SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
+        #endif
+      }
+    #else
+      if (pwm_value == SPINDLE_PWM_OFF_VALUE) {
+        SPINDLE_TCCRA_REGISTER &= ~(1<<SPINDLE_COMB_BIT); // Disable PWM. Output voltage is zero.
+      } else {
+        SPINDLE_TCCRA_REGISTER |= (1<<SPINDLE_COMB_BIT); // Ensure PWM output is enabled.
+      }
+    #endif
+  #endif //PERNA
 }
 
 
@@ -99,42 +107,47 @@ void spindle_set_speed(uint16_t pwm_value)
   // Called by spindle_set_state() and step segment generator. Keep routine small and efficient.
   uint16_t spindle_compute_pwm_value(float rpm) // 328p PWM register is 8-bit.
   {
-    uint16_t pwm_value;
-    rpm *= (0.010*sys.spindle_speed_ovr); // Scale by spindle speed override value.
-    // Calculate PWM register value based on rpm max/min settings and programmed rpm.
-    if ((settings.rpm_min >= settings.rpm_max) || (rpm >= RPM_MAX)) {
-      rpm = RPM_MAX;
-      pwm_value = SPINDLE_PWM_MAX_VALUE;
-    } else if (rpm <= RPM_MIN) {
-      if (rpm == 0.0) { // S0 disables spindle
-        pwm_value = SPINDLE_PWM_OFF_VALUE;
+    #ifdef SPINDLE_ENABLE_DDR //PERNA
+      uint16_t pwm_value;
+      rpm *= (0.010*sys.spindle_speed_ovr); // Scale by spindle speed override value.
+      // Calculate PWM register value based on rpm max/min settings and programmed rpm.
+      if ((settings.rpm_min >= settings.rpm_max) || (rpm >= RPM_MAX)) {
+        rpm = RPM_MAX;
+        pwm_value = SPINDLE_PWM_MAX_VALUE;
+      } else if (rpm <= RPM_MIN) {
+        if (rpm == 0.0) { // S0 disables spindle
+          pwm_value = SPINDLE_PWM_OFF_VALUE;
+        } else {
+          rpm = RPM_MIN;
+          pwm_value = SPINDLE_PWM_MIN_VALUE;
+        }
       } else {
-        rpm = RPM_MIN;
-        pwm_value = SPINDLE_PWM_MIN_VALUE;
+        // Compute intermediate PWM value with linear spindle speed model via piecewise linear fit model.
+        #if (N_PIECES > 3)
+          if (rpm > RPM_POINT34) {
+            pwm_value = floor(RPM_LINE_A4*rpm - RPM_LINE_B4);
+          } else 
+        #endif
+        #if (N_PIECES > 2)
+          if (rpm > RPM_POINT23) {
+            pwm_value = floor(RPM_LINE_A3*rpm - RPM_LINE_B3);
+          } else 
+        #endif
+        #if (N_PIECES > 1)
+          if (rpm > RPM_POINT12) {
+            pwm_value = floor(RPM_LINE_A2*rpm - RPM_LINE_B2);
+          } else 
+        #endif
+        {
+          pwm_value = floor(RPM_LINE_A1*rpm - RPM_LINE_B1);
+        }
       }
-    } else {
-      // Compute intermediate PWM value with linear spindle speed model via piecewise linear fit model.
-      #if (N_PIECES > 3)
-        if (rpm > RPM_POINT34) {
-          pwm_value = floor(RPM_LINE_A4*rpm - RPM_LINE_B4);
-        } else 
-      #endif
-      #if (N_PIECES > 2)
-        if (rpm > RPM_POINT23) {
-          pwm_value = floor(RPM_LINE_A3*rpm - RPM_LINE_B3);
-        } else 
-      #endif
-      #if (N_PIECES > 1)
-        if (rpm > RPM_POINT12) {
-          pwm_value = floor(RPM_LINE_A2*rpm - RPM_LINE_B2);
-        } else 
-      #endif
-      {
-        pwm_value = floor(RPM_LINE_A1*rpm - RPM_LINE_B1);
-      }
-    }
-    sys.spindle_speed = rpm;
-    return(pwm_value);
+      sys.spindle_speed = rpm;
+      return(pwm_value);
+    #else //PERNA
+      sys.spindle_speed = 0; //PERNA
+      return(0); //PERNA
+    #endif //PERNA
   }
 
 #else 
@@ -180,26 +193,27 @@ void spindle_set_state(uint8_t state, float rpm)
     spindle_stop();
   
   } else {
-  
-    if (state == SPINDLE_ENABLE_CW) {
-      SPINDLE_DIRECTION_PORT &= ~(1<<SPINDLE_DIRECTION_BIT);
-    } else {
-      SPINDLE_DIRECTION_PORT |= (1<<SPINDLE_DIRECTION_BIT);
-    }
+    #ifdef SPINDLE_ENABLE_DDR //PERNA
+      if (state == SPINDLE_ENABLE_CW) {
+        SPINDLE_DIRECTION_PORT &= ~(1<<SPINDLE_DIRECTION_BIT);
+      } else {
+        SPINDLE_DIRECTION_PORT |= (1<<SPINDLE_DIRECTION_BIT);
+      }
 
-    // NOTE: Assumes all calls to this function is when Grbl is not moving or must remain off.
-    if (settings.flags & BITFLAG_LASER_MODE) { 
-      if (state == SPINDLE_ENABLE_CCW) { rpm = 0.0; } // TODO: May need to be rpm_min*(100/MAX_SPINDLE_SPEED_OVERRIDE);
-    }
-    spindle_set_speed(spindle_compute_pwm_value(rpm));
+      // NOTE: Assumes all calls to this function is when Grbl is not moving or must remain off.
+      if (settings.flags & BITFLAG_LASER_MODE) { 
+        if (state == SPINDLE_ENABLE_CCW) { rpm = 0.0; } // TODO: May need to be rpm_min*(100/MAX_SPINDLE_SPEED_OVERRIDE);
+      }
+      spindle_set_speed(spindle_compute_pwm_value(rpm));
 
-    #ifndef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
-      #ifdef INVERT_SPINDLE_ENABLE_PIN
-        SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT);
-      #else
-        SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
-      #endif   
-    #endif
+      #ifndef SPINDLE_ENABLE_OFF_WITH_ZERO_SPEED
+        #ifdef INVERT_SPINDLE_ENABLE_PIN
+          SPINDLE_ENABLE_PORT &= ~(1<<SPINDLE_ENABLE_BIT);
+        #else
+          SPINDLE_ENABLE_PORT |= (1<<SPINDLE_ENABLE_BIT);
+        #endif   
+      #endif
+    #endif //PERNA
   
   }
   

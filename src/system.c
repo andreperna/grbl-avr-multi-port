@@ -23,14 +23,16 @@
 
 void system_init()
 {
-  CONTROL_DDR &= ~(CONTROL_MASK); // Configure as input pins
-  #ifdef DISABLE_CONTROL_PIN_PULL_UP
-    CONTROL_PORT &= ~(CONTROL_MASK); // Normal low operation. Requires external pull-down.
-  #else
-    CONTROL_PORT |= CONTROL_MASK;   // Enable internal pull-up resistors. Normal high operation.
+  #ifdef CONTROL_DDR //PERNA
+    CONTROL_DDR &= ~(CONTROL_MASK); // Configure as input pins
+    #ifdef DISABLE_CONTROL_PIN_PULL_UP
+      CONTROL_PORT &= ~(CONTROL_MASK); // Normal low operation. Requires external pull-down.
+    #else
+      CONTROL_PORT |= CONTROL_MASK;   // Enable internal pull-up resistors. Normal high operation.
+    #endif
+    CONTROL_PCMSK |= CONTROL_MASK;  // Enable specific pins of the Pin Change Interrupt
+    PCICR |= (1 << CONTROL_INT);   // Enable Pin Change Interrupt
   #endif
-  CONTROL_PCMSK |= CONTROL_MASK;  // Enable specific pins of the Pin Change Interrupt
-  PCICR |= (1 << CONTROL_INT);   // Enable Pin Change Interrupt
 }
 
 
@@ -40,16 +42,18 @@ void system_init()
 uint8_t system_control_get_state()
 {
   uint8_t control_state = 0;
-  uint8_t pin = (CONTROL_PIN & CONTROL_MASK);
-  #ifdef INVERT_CONTROL_PIN_MASK
-    pin ^= INVERT_CONTROL_PIN_MASK;
+  #ifdef CONTROL_DDR //PERNA
+    uint8_t pin = (CONTROL_PIN & CONTROL_MASK);
+    #ifdef INVERT_CONTROL_PIN_MASK
+      pin ^= INVERT_CONTROL_PIN_MASK;
+    #endif
+    if (pin) {
+      if (bit_isfalse(pin,(1<<CONTROL_SAFETY_DOOR_BIT))) { control_state |= CONTROL_PIN_INDEX_SAFETY_DOOR; }
+      if (bit_isfalse(pin,(1<<CONTROL_RESET_BIT))) { control_state |= CONTROL_PIN_INDEX_RESET; }
+      if (bit_isfalse(pin,(1<<CONTROL_FEED_HOLD_BIT))) { control_state |= CONTROL_PIN_INDEX_FEED_HOLD; }
+      if (bit_isfalse(pin,(1<<CONTROL_CYCLE_START_BIT))) { control_state |= CONTROL_PIN_INDEX_CYCLE_START; }
+    }
   #endif
-  if (pin) {
-    if (bit_isfalse(pin,(1<<CONTROL_SAFETY_DOOR_BIT))) { control_state |= CONTROL_PIN_INDEX_SAFETY_DOOR; }
-    if (bit_isfalse(pin,(1<<CONTROL_RESET_BIT))) { control_state |= CONTROL_PIN_INDEX_RESET; }
-    if (bit_isfalse(pin,(1<<CONTROL_FEED_HOLD_BIT))) { control_state |= CONTROL_PIN_INDEX_FEED_HOLD; }
-    if (bit_isfalse(pin,(1<<CONTROL_CYCLE_START_BIT))) { control_state |= CONTROL_PIN_INDEX_CYCLE_START; }
-  }
   return(control_state);
 }
 
@@ -58,21 +62,23 @@ uint8_t system_control_get_state()
 // only the realtime command execute variable to have the main program execute these when
 // its ready. This works exactly like the character-based realtime commands when picked off
 // directly from the incoming serial data stream.
-ISR(CONTROL_INT_vect)
-{
-  uint8_t pin = system_control_get_state();
-  if (pin) {
-    if (bit_istrue(pin,CONTROL_PIN_INDEX_RESET)) {
-      mc_reset();
-    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_CYCLE_START)) {
-      bit_true(sys_rt_exec_state, EXEC_CYCLE_START);
-    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_FEED_HOLD)) {
-      bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
-    } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
-      bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
-    } 
+#ifdef CONTROL_INT_vect //PERNA
+  ISR(CONTROL_INT_vect)
+  {
+    uint8_t pin = system_control_get_state();
+    if (pin) {
+      if (bit_istrue(pin,CONTROL_PIN_INDEX_RESET)) {
+        mc_reset();
+      } else if (bit_istrue(pin,CONTROL_PIN_INDEX_CYCLE_START)) {
+        bit_true(sys_rt_exec_state, EXEC_CYCLE_START);
+      } else if (bit_istrue(pin,CONTROL_PIN_INDEX_FEED_HOLD)) {
+        bit_true(sys_rt_exec_state, EXEC_FEED_HOLD); 
+      } else if (bit_istrue(pin,CONTROL_PIN_INDEX_SAFETY_DOOR)) {
+        bit_true(sys_rt_exec_state, EXEC_SAFETY_DOOR);
+      } 
+    }
   }
-}
+#endif
 
 
 // Returns if safety door is ajar(T) or closed(F), based on pin state.
