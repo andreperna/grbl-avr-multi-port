@@ -35,7 +35,8 @@ SOURCE    = main.c motion_control.c gcode.c spindle_control.c coolant_control.c 
              protocol.c stepper.c eeprom.c settings.c planner.c nuts_bolts.c limits.c \
              print.c probe.c report.c system.c sleep.c jog.c
 BUILDDIR = build
-SOURCEDIR = grbl
+# SOURCEDIR = grbl //PERNA
+SOURCEDIR = src
 # FUSES      = -U hfuse:w:0xd9:m -U lfuse:w:0x24:m
 FUSES      = -U hfuse:w:0xd2:m -U lfuse:w:0xff:m
 

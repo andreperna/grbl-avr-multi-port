@@ -4,4 +4,8 @@
 *.DS_Store
 *.d
 
-README.md
+.pio
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+
+# README.md
