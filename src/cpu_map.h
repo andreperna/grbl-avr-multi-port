@@ -361,17 +361,24 @@
   #define MIN_LIMIT_PIN(i) _PIN(MIN_LIMIT_PORT_##i)
   #define INVERT_MIN_LIMIT_PIN_MASK ((1<<X_AXIS) | (1<<Y_AXIS) | (1<<Z_AXIS))
 
-  #define MAX_LIMIT_PORT_0 D
-  #define MAX_LIMIT_PORT_1 D
+  // #define MAX_LIMIT_PORT_0 D
+  // #define MAX_LIMIT_PORT_1 D
+  // #define MAX_LIMIT_PORT_2 C
+  // #define MAX_LIMIT_BIT_0 3 // X Limit Max - Pin D3 - Encoder EN1 Ch.A
+  // #define MAX_LIMIT_BIT_1 2 // Y Limit Max - Pin D2 - Encoder EN2 Ch.B
+  // #define MAX_LIMIT_BIT_2 0 // Z Limit Max - Pin C0 - Encoder Button
+  #define MAX_LIMIT_PORT_0 C
+  #define MAX_LIMIT_PORT_1 C
   #define MAX_LIMIT_PORT_2 C
-  #define MAX_LIMIT_BIT_0 3 // X Limit Max - Pin D3 - Encoder EN1 Ch.A
-  #define MAX_LIMIT_BIT_1 2 // Y Limit Max - Pin D2 - Encoder EN2 Ch.B
-  #define MAX_LIMIT_BIT_2 0 // Z Limit Max - Pin C0 - Encoder Button
+  #define MAX_LIMIT_BIT_0 2 // X Limit Min - Pin C2
+  #define MAX_LIMIT_BIT_1 3 // Y Limit Min - Pin C3
+  #define MAX_LIMIT_BIT_2 4 // Z Limit Min - Pin C4
   #define _MAX_LIMIT_BIT(i) MAX_LIMIT_BIT_##i
   #define MAX_LIMIT_BIT(i) _MAX_LIMIT_BIT(i)
   #define MAX_LIMIT_DDR(i) _DDR(MAX_LIMIT_PORT_##i)
   #define MAX_LIMIT_PORT(i) _PORT(MAX_LIMIT_PORT_##i)
   #define MAX_LIMIT_PIN(i) _PIN(MAX_LIMIT_PORT_##i)
+  #define INVERT_MAX_LIMIT_PIN_MASK ((1<<X_AXIS) | (1<<Y_AXIS) | (1<<Z_AXIS))
 
   //  #define LIMIT_INT       PCIE0  // Pin change interrupt enable pin
   //  #define LIMIT_INT_vect  PCINT0_vect 
@@ -410,11 +417,11 @@
   // #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
 
   // Define probe switch input pin.
-  // #define PROBE_DDR       DDRA
-  // #define PROBE_PIN       PINA
-  // #define PROBE_PORT      PORTA
-  // #define PROBE_BIT       6  // MEGA2560 Analog Pin 15
-  // #define PROBE_MASK      (1<<PROBE_BIT)
+  #define PROBE_DDR       DDRC
+  #define PROBE_PIN       PINC
+  #define PROBE_PORT      PORTC
+  #define PROBE_BIT       0  // Pin C0 - Encoder Button
+  #define PROBE_MASK      (1<<PROBE_BIT)
 
   // Advanced Configuration Below You should not need to touch these variables
   // Set Timer up to use TIMER4B which is attached to Digital Pin 8 - Ramps 1.4 12v output with heat sink
