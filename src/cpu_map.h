@@ -359,7 +359,7 @@
   #define MIN_LIMIT_DDR(i) _DDR(MIN_LIMIT_PORT_##i)
   #define MIN_LIMIT_PORT(i) _PORT(MIN_LIMIT_PORT_##i)
   #define MIN_LIMIT_PIN(i) _PIN(MIN_LIMIT_PORT_##i)
-  #define INVERT_MIN_LIMIT_PIN_MASK ((1<<X_AXIS) | (1<<Y_AXIS) | (1<<Z_AXIS))
+  // #define INVERT_MIN_LIMIT_PIN_MASK ((1<<X_AXIS) | (1<<Y_AXIS) | (1<<Z_AXIS))
 
   #define MAX_LIMIT_PORT_0 D
   #define MAX_LIMIT_PORT_1 D
