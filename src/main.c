@@ -44,6 +44,10 @@ int main(void)
   stepper_init();  // Configure stepper pins and interrupt timers
   system_init();   // Configure pinout pins and pin-change interrupt
 
+  lcd_init(); // PERNA
+
+
+
   memset(sys_position,0,sizeof(sys_position)); // Clear machine position.
   sei(); // Enable interrupts
 

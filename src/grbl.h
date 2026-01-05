@@ -62,6 +62,8 @@
 #include "jog.h"
 #include "sleep.h"
 
+#include "st7920.h" //PERNA
+
 // ---------------------------------------------------------------------------------------
 // COMPILE-TIME ERROR CHECKING OF DEFINE VALUES:
 

@@ -37,6 +37,7 @@ static void protocol_exec_rt_suspend();
 */
 void protocol_main_loop()
 {
+  
   // Perform some machine checks to make sure everything is good to go.
   #ifdef CHECK_LIMITS_AT_INIT
     if (bit_istrue(settings.flags, BITFLAG_HARD_LIMIT_ENABLE)) {
@@ -72,6 +73,7 @@ void protocol_main_loop()
   uint8_t char_counter = 0;
   uint8_t c;
   for (;;) {
+  
 
     // Process one line of incoming serial data, as the data becomes available. Performs an
     // initial filtering by removing spaces and comments and capitalizing all letters.
@@ -210,6 +212,10 @@ void protocol_auto_cycle_start()
 void protocol_execute_realtime()
 {
   protocol_exec_rt_system();
+
+  // PERNA - Update LCD Display
+  lcd_update(); //PERNA
+
   if (sys.suspend) { protocol_exec_rt_suspend(); }
 }
 
