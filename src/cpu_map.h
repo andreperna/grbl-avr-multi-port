@@ -417,10 +417,17 @@
   // #define CONTROL_MASK      ((1<<CONTROL_RESET_BIT)|(1<<CONTROL_FEED_HOLD_BIT)|(1<<CONTROL_CYCLE_START_BIT)|(1<<CONTROL_SAFETY_DOOR_BIT))
 
   // Define probe switch input pin.
-  #define PROBE_DDR       DDRC
-  #define PROBE_PIN       PINC
-  #define PROBE_PORT      PORTC
-  #define PROBE_BIT       0  // Pin C0 - Encoder Button
+  // #define PROBE_DDR       DDRC
+  // #define PROBE_PIN       PINC
+  // #define PROBE_PORT      PORTC
+  // #define PROBE_BIT       0  // Pin C0 - Encoder Button
+  // #define PROBE_MASK      (1<<PROBE_BIT)
+
+  // Define probe switch input pin.
+  #define PROBE_DDR       DDRA
+  #define PROBE_PIN       PINA
+  #define PROBE_PORT      PORTA
+  #define PROBE_BIT       7  // Pin A7 - TEMP_0_PIN / Hotend
   #define PROBE_MASK      (1<<PROBE_BIT)
 
   // Advanced Configuration Below You should not need to touch these variables
