@@ -72,15 +72,15 @@ void lcd_write_coords(char* eixo, float valor){
     // arredonda terceira casa decimal
     float valor_arredondado;
     if (valor >= 0){
-        valor_arredondado = valor + 0.005f;
+        valor_arredondado = valor + 0.0005f;
     } else {
-        valor_arredondado = valor - 0.005f;
+        valor_arredondado = valor - 0.0005f;
     }
 
-    valor_arredondado = valor;
+    // valor_arredondado = valor;
 
     int inteiro = (int)valor_arredondado;
-    int decimal = (int)((valor_arredondado - inteiro) * 100);
+    int decimal = (int)((valor_arredondado - inteiro) * 1000);
     if (decimal < 0) {
       decimal = decimal * -1;
     }
@@ -88,7 +88,7 @@ void lcd_write_coords(char* eixo, float valor){
     // char eixo[1] = "X";
     
     // snprintf(onde guardar, tamanho, "formato", variáveis...)
-    snprintf(buffer, sizeof(buffer), "%s%4d.%03d", eixo, inteiro, decimal);
+    snprintf(buffer, sizeof(buffer), "   %s %4d.%03d", eixo, inteiro, decimal);
 
     // Envia a string formatada
     lcd_write_string(buffer);
